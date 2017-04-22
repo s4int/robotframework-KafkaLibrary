@@ -78,8 +78,6 @@ class Consumer(object):
         - ``partitions`` (list of `TopicPartition`): Assignment for this instance.
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             topic_partition = [topic_partition]
         if not self._is_assigned(topic_partition):
@@ -103,8 +101,6 @@ class Consumer(object):
         - ``topic_partition`` (TopicPartition): Partition to check
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             return self.consumer.position(topic_partition)
         else:
@@ -117,8 +113,6 @@ class Consumer(object):
         - ``topic_partition`` (`TopicPartition`): Partition for seek operation
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             self.consumer.seek(topic_partition, offset=offset)
         else:
@@ -131,8 +125,6 @@ class Consumer(object):
           otherwise default to all assigned partitions.
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             self.consumer.seek_to_beginning(topic_partition)
         else:
@@ -145,8 +137,6 @@ class Consumer(object):
           otherwise default to all assigned partitions.
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             self.consumer.seek_to_end(topic_partition)
         else:
@@ -180,13 +170,11 @@ class Consumer(object):
         - ``topic_partition`` (list of TopicPartition)
         """
 
-        if isinstance(topic_partition, (unicode, str)):
-            topic_partition = eval(topic_partition)
         if isinstance(topic_partition, TopicPartition):
             topic_partition = [topic_partition]
 
         number_of_messages = 0
-        subscription = self.consumer.subscription()
+        assignment = self.consumer.assignment()
 
         self.consumer.unsubscribe()
         for Partition in topic_partition:
@@ -202,7 +190,7 @@ class Consumer(object):
             number_of_messages += end-start
 
         self.consumer.unsubscribe()
-        self.consumer.subscribe(subscription)
+        self.consumer.assign(assignment)
         return number_of_messages
 
     def poll(self, timeout_ms=0, max_records=None):
