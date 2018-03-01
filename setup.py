@@ -3,7 +3,8 @@
 from os.path import join, dirname
 from setuptools import setup
 
-execfile(join(dirname(__file__), 'KafkaLibrary', 'version.py'))
+filename=join(dirname(__file__), 'KafkaLibrary', 'version.py')
+exec(compile(open(filename).read(),filename, 'exec'))
 
 DESCRIPTION = """
 Kafka support for Robot Framework.
