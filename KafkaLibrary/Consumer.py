@@ -205,7 +205,7 @@ class Consumer(object):
         messages = self.consumer.poll(timeout_ms=timeout_ms, max_records=max_records)
 
         result = []
-        for _, msg in messages.iteritems():
+        for _, msg in messages.items():
             for item in msg:
                 result.append(item)
         return result
