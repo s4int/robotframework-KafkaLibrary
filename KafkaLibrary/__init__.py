@@ -1,7 +1,7 @@
-from Consumer import Consumer
-from Producer import Producer
+from .Consumer import Consumer
+from .Producer import Producer
 from kafka import TopicPartition
-from version import VERSION
+from .version import VERSION
 
 __version__ = VERSION
 
