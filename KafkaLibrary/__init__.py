@@ -38,5 +38,3 @@ class KafkaLibrary(Consumer, Producer):
 
         return TopicPartition(topic=topic, partition=partition)
 
-    def close(self):
-        self.consumer.close()
