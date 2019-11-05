@@ -13,6 +13,21 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose --no-ansi up -d
   - docker-compose --no-ansi ps
+  # Create a Kafka topic named "test-topic" and confirm that it was created successfully
+  - docker-compose exec broker kafka-topics --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic test-topic
+  - >
+    docker-compose exec broker kafka-topics --list --zookeeper zookeeper:2181 2>&1
+    | awk 'FNR == 1 {print}' | grep "test-topic"
+    && (echo "Topic created - pass" && exit 0)
+    || (echo "Topic created - fail" && exit 1)
+  # Send a test message to this topic using node 2
+  - docker-compose exec broker sh -c 'echo "test message" | kafka-console-producer --broker-list broker:9092 --topic test-topic'
+  # Consume the message from the topic using node 3 to confirm it was sent successfully
+  - >
+    docker-compose exec broker kafka-console-consumer --topic test-topic --from-beginning --max-messages 1 --bootstrap-server broker:9092 2>&1
+    | awk 'FNR == 1 {print}' | grep "test message"
+    && (echo "Message consumed - pass" && exit 0)
+    || (echo "Message consumed - fail" && exit 1)
 install:
   - pip install -r requirements.txt
   - pip install .
