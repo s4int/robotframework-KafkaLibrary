@@ -20,7 +20,7 @@ before_install:
     while [ $(eval B="$CMD" && echo ${#B[@]}) -lt 1 ]; do sleep 3;done;
     eval B="$CMD";
     echo "Brokers#: ${#B[@]}"'
-  # List Kafka topics
+  # List Kafka topics, wait until broker is available
   - docker-compose exec broker timeout 90 /bin/bash -c 'until kafka-topics --list --bootstrap-server broker:29092| grep "_confluent-metrics"; do printf "."; done'
   # Create a Kafka topic named "test-topic" and confirm that it was created successfully
   - docker-compose exec broker kafka-topics --create --bootstrap-server broker:29092 --replication-factor 1 --partitions 1 --topic test-topic
@@ -29,9 +29,9 @@ before_install:
     | grep "test-topic"
     && (echo "Topic created - pass" && exit 0)
     || (echo "Topic created - fail" && exit 1)
-  # Send a test message to this topic using node 2
+  # Send a test message to this topic
   - docker-compose exec broker sh -c 'echo "test message" | kafka-console-producer --broker-list broker:9092 --topic test-topic'
-  # Consume the message from the topic using node 3 to confirm it was sent successfully
+  # Consume the message from the topic to confirm it was sent successfully
   - >
     docker-compose exec broker kafka-console-consumer --topic test-topic --from-beginning --max-messages 1 --bootstrap-server broker:9092 2>&1
     | awk 'FNR == 1 {print}' | grep "test message"

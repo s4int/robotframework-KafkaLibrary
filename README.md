@@ -1,3 +1,7 @@
+
+[![Build Status](https://travis-ci.org/s4int/robotframework-KafkaLibrary.svg?branch=master)](https://travis-ci.org/s4int/robotframework-KafkaLibrary)
+[![Build Status](https://img.shields.io/pypi/v/robotframework-kafkalibrary.svg?label=version)](https://pypi.python.org/pypi/robotframework-kafkalibrary)
+
 # Robot Framework KafkaLibrary
 ## Introduction
 KafkaLibrary is a [Robot Framework](http://robotframework.org/) library to interface with [Apache Kafka](https://kafka.apache.org/).
