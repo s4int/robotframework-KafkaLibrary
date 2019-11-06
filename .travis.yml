@@ -21,10 +21,7 @@ before_install:
     eval B="$CMD";
     echo "Brokers#: ${#B[@]}"'
   # List Kafka topics
-  - travis_retry docker-compose exec broker kafka-topics --list --bootstrap-server broker:29092 2>&1
-    | grep "_confluent-metrics"
-    && (echo "broker running - pass" && exit 0)
-    || (echo "broker running - fail" && exit 1)
+  - docker-compose exec broker timeout 90 /bin/bash -c 'until kafka-topics --list --bootstrap-server broker:29092| grep "_confluent-metrics"; do printf "."; done'
   # Create a Kafka topic named "test-topic" and confirm that it was created successfully
   - docker-compose exec broker kafka-topics --create --bootstrap-server broker:29092 --replication-factor 1 --partitions 1 --topic test-topic
   - >
