@@ -15,7 +15,7 @@ before_install:
   - docker-compose --no-ansi ps
   # Check number of Kafka brokers
   - >
-    docker-compose exec zookeeper timeout 3 /bin/bash -c '
+    docker-compose exec zookeeper timeout 90 /bin/bash -c '
     CMD='\''$(/usr/bin/zookeeper-shell zookeeper:2181 ls /brokers/ids |tail -1|sed "s/\,//g"|sed "s/\[/\(/"|sed "s/\]/\)/")'\'';
     while [ $(eval B="$CMD" && echo ${#B[@]}) -lt 1 ]; do printf ".";done'
   # Create a Kafka topic named "test-topic" and confirm that it was created successfully
