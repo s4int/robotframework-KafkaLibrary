@@ -44,7 +44,7 @@ Create Partition
     [Return]    ${topicPartition}
 
 Send ${n} Text Messages to topic ${topic}
-    [Documentation]    Loops over values from 1 to n
+    [Documentation]    Loops over values from 0 to n
     FOR    ${index}    IN RANGE    0    ${n}
         Send Text Message  ${topic}  messahe no. ${index}
     END
