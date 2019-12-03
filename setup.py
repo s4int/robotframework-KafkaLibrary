@@ -1,10 +1,19 @@
 #!/usr/bin/env python
 
-from os.path import join, dirname
+from os.path import join, dirname, abspath
 from setuptools import setup
+import sys
 
-filename=join(dirname(__file__), 'KafkaLibrary', 'version.py')
-exec(compile(open(filename).read(),filename, 'exec'))
+
+CURDIR = dirname(abspath(__file__))
+with open(join(CURDIR, 'requirements.txt')) as f:
+    REQUIREMENTS = f.read().splitlines()
+
+filename = join(dirname(__file__), 'KafkaLibrary', 'version.py')
+if sys.version_info.major >= 3:
+    exec(compile(open(filename).read(), filename, 'exec'))
+else:
+    execfile(filename)
 
 DESCRIPTION = """
 Kafka support for Robot Framework.
@@ -27,9 +36,6 @@ setup(name         = 'robotframework-kafkalibrary',
           "Programming Language :: Python",
           "Topic :: Software Development :: Testing"
       ],
-      install_requires = [
-          'robotframework >= 2.6.0',
-          'kafka-python',
-      ],
+      install_requires = REQUIREMENTS,
       packages    = ['KafkaLibrary'],
       )

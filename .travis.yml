@@ -1,0 +1,46 @@
+language: python
+python:
+  - 2.7
+  - 3.6
+services:
+  - docker
+env:
+  - DOCKER_COMPOSE_VERSION=1.24.1
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose --no-ansi up -d
+  - docker-compose --no-ansi ps
+  # Check number of Kafka brokers
+  - >
+    docker-compose exec zookeeper timeout 90 /bin/bash -c '
+    CMD='\''$(/usr/bin/zookeeper-shell zookeeper:2181 ls /brokers/ids 2>&1 |tail -1|sed "s/\,//g"|sed "s/\[/\(/"|sed "s/\]/\)/")'\'';
+    while [ $(eval B="$CMD" && echo ${#B[@]}) -lt 1 ]; do sleep 3;done;
+    eval B="$CMD";
+    echo "Brokers#: ${#B[@]}"'
+  # List Kafka topics, wait until broker is available
+  - docker-compose exec broker timeout 90 /bin/bash -c 'until kafka-topics --list --bootstrap-server broker:29092| grep "_confluent-metrics"; do printf "."; done'
+  # Create a Kafka topic named "test-topic" and confirm that it was created successfully
+  - docker-compose exec broker kafka-topics --create --bootstrap-server broker:29092 --replication-factor 1 --partitions 1 --topic test-topic
+  - >
+    docker-compose exec broker kafka-topics --list --bootstrap-server broker:29092 2>&1
+    | grep "test-topic"
+    && (echo "Topic created - pass" && exit 0)
+    || (echo "Topic created - fail" && exit 1)
+  # Send a test message to this topic
+  - docker-compose exec broker sh -c 'echo "test message" | kafka-console-producer --broker-list broker:9092 --topic test-topic'
+  # Consume the message from the topic to confirm it was sent successfully
+  - >
+    docker-compose exec broker kafka-console-consumer --topic test-topic --from-beginning --max-messages 1 --bootstrap-server broker:9092 2>&1
+    | awk 'FNR == 1 {print}' | grep "test message"
+    && (echo "Message consumed - pass" && exit 0)
+    || (echo "Message consumed - fail" && exit 1)
+install:
+  - pip install -r requirements.txt
+  - pip install .
+script:
+  - robot -x xunit.xml tests
+after_script:
+  - docker-compose --no-ansi down
